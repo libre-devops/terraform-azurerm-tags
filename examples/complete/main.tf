@@ -3,8 +3,8 @@ locals {
 }
 
 # Complete call: every input exercised. environment is set explicitly to a valid stage code, a
-# Microsoft hidden-title tag is added, the deployed-from context is set (normally the
-# terraform-azure action sets these in CI via TF_VAR_*), and extra tags are merged in.
+# Microsoft hidden-title tag is added, the deployed-from context is forwarded from root variables
+# (the terraform-azure action fills them in CI via TF_VAR_*), and extra tags are merged in.
 module "tags" {
   source = "../../"
 
@@ -15,8 +15,8 @@ module "tags" {
 
   include_timestamp_tags = true
 
-  deployed_branch = "main"
-  deployed_repo   = "https://github.com/libre-devops/terraform-azurerm-tags"
+  deployed_branch = var.deployed_branch
+  deployed_repo   = var.deployed_repo
 
   additional_tags = {
     Application = "terraform-azurerm-tags"
