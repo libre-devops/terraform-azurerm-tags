@@ -1,11 +1,11 @@
 <div align="center">
-
-<a href="https://libredevops.org">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://libredevops.org/assets/libre-devops-white.png">
-    <img alt="Libre DevOps" src="https://libredevops.org/assets/libre-devops-black.png" width="300">
-  </picture>
-</a>
+  <a href="https://libredevops.org">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://libredevops.org/assets/libre-devops-white.png">
+      <img alt="Libre DevOps" src="https://libredevops.org/assets/libre-devops-black.png" width="300">
+    </picture>
+  </a>
+</div>
 
 # Terraform Azure Tags
 
@@ -15,8 +15,6 @@ A small module that produces one validated, merged tag map for Azure resources.
 [![Release](https://img.shields.io/github/v/release/libre-devops/terraform-azurerm-tags?sort=semver&label=release)](https://github.com/libre-devops/terraform-azurerm-tags/releases/latest)
 [![Terraform Registry](https://img.shields.io/badge/registry-libre--devops-7B42BC?logo=terraform&logoColor=white)](https://registry.terraform.io/namespaces/libre-devops)
 [![License](https://img.shields.io/github/license/libre-devops/terraform-azurerm-tags)](./LICENSE)
-
-</div>
 
 ---
 
