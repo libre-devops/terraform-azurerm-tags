@@ -1,37 +1,95 @@
-# Plan-time tests for the module. The azurerm provider is mocked, so no credentials, no
-# features block, and no cloud calls are needed:
+# Plan-time tests for the tagging module. It creates no resources and needs no provider:
 #   terraform init -backend=false && terraform test
 
-mock_provider "azurerm" {}
-
 variables {
-  resource_groups = [
-    {
-      name     = "rg-ldo-uks-tst-tmpl-01"
-      location = "uksouth"
-    },
-  ]
+  cost_centre = "1888/67"
+  owner       = "platform@example.com"
+  environment = "dev"
 }
 
-run "creates_the_resource_group" {
+run "produces_core_tags" {
   command = plan
 
   assert {
-    condition     = azurerm_resource_group.this["rg-ldo-uks-tst-tmpl-01"].location == "uksouth"
-    error_message = "The resource group should be created in the requested location."
+    condition     = output.tags["Environment"] == "Dev"
+    error_message = "Environment should be Title-cased."
   }
-
   assert {
-    condition     = length(azurerm_resource_group.this) == length(var.resource_groups)
-    error_message = "One resource group should be created per list entry."
+    condition     = output.tags["CostCentre"] == "1888/67"
+    error_message = "CostCentre should pass through unchanged."
+  }
+  assert {
+    condition     = output.tags["Owner"] == "platform@example.com"
+    error_message = "Owner should pass through unchanged."
   }
 }
 
-run "tags_default_to_empty" {
+run "trims_empty_deployed_tags" {
   command = plan
 
   assert {
-    condition     = length(azurerm_resource_group.this["rg-ldo-uks-tst-tmpl-01"].tags) == 0
-    error_message = "tags should default to an empty map when not supplied."
+    condition     = !contains(keys(output.tags), "DeployedBranch") && !contains(keys(output.tags), "DeployedRepo")
+    error_message = "Empty deployed tags should be trimmed from the output."
+  }
+}
+
+run "sets_deployed_tags_when_supplied" {
+  command = plan
+
+  variables {
+    deployed_branch = "main"
+    deployed_repo   = "https://github.com/libre-devops/terraform-azurerm-tags"
+  }
+
+  assert {
+    condition     = output.tags["DeployedBranch"] == "main"
+    error_message = "DeployedBranch should be set from the variable."
+  }
+  assert {
+    condition     = output.tags["DeployedRepo"] == "https://github.com/libre-devops/terraform-azurerm-tags"
+    error_message = "DeployedRepo should be set from the variable."
+  }
+}
+
+run "adds_hidden_title_when_set" {
+  command = plan
+
+  variables {
+    hidden_title = "ldo-platform"
+  }
+
+  assert {
+    condition     = output.tags["hidden-title"] == "ldo-platform"
+    error_message = "A hidden-title tag should be added when hidden_title is provided."
+  }
+}
+
+run "additional_tags_win" {
+  command = plan
+
+  variables {
+    additional_tags = { Owner = "override@example.com", Application = "demo" }
+  }
+
+  assert {
+    condition     = output.tags["Owner"] == "override@example.com"
+    error_message = "additional_tags should override core tags (merged last)."
+  }
+  assert {
+    condition     = output.tags["Application"] == "demo"
+    error_message = "additional_tags should be merged into the output."
+  }
+}
+
+run "timestamp_can_be_disabled" {
+  command = plan
+
+  variables {
+    include_timestamp_tags = false
+  }
+
+  assert {
+    condition     = !contains(keys(output.tags), "LastUpdated")
+    error_message = "LastUpdated should be omitted when include_timestamp_tags is false."
   }
 }

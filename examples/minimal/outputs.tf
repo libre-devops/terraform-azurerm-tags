@@ -1,9 +1,9 @@
-output "ids" {
-  description = "Map of resource group name to id."
-  value       = module.this.ids
+output "resource_group_name" {
+  description = "Name of the tagged resource group."
+  value       = azurerm_resource_group.this.name
 }
 
-output "names" {
-  description = "Map of resource group name to name."
-  value       = module.this.names
+output "tags" {
+  description = "The tag map produced by the module."
+  value       = module.tags.tags
 }

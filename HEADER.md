@@ -1,9 +1,3 @@
-<!--
-  This is the template for every Libre DevOps Terraform module. When you create a module from it:
-    - replace the title, tagline, and the CI workflow / repo name in the badge URLs
-    - replace the resources in main.tf, and the variables, outputs, and examples to match
-    - run `just docs` (or Sort-LdoTerraform.ps1) to regenerate the section between the markers
--->
 <div align="center">
 
 <a href="https://libredevops.org">
@@ -13,70 +7,87 @@
   </picture>
 </a>
 
-# Terraform Module Template
+# Terraform Azure Tags
 
-A starting point for Libre DevOps Terraform modules: the standard file layout, examples, tests, and tooling.
+A small module that produces one validated, merged tag map for Azure resources.
 
-[![CI](https://github.com/libre-devops/terraform-module-template/actions/workflows/ci.yml/badge.svg)](https://github.com/libre-devops/terraform-module-template/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/libre-devops/terraform-module-template?sort=semver&label=release)](https://github.com/libre-devops/terraform-module-template/releases/latest)
+[![CI](https://github.com/libre-devops/terraform-azurerm-tags/actions/workflows/ci.yml/badge.svg)](https://github.com/libre-devops/terraform-azurerm-tags/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/libre-devops/terraform-azurerm-tags?sort=semver&label=release)](https://github.com/libre-devops/terraform-azurerm-tags/releases/latest)
 [![Terraform Registry](https://img.shields.io/badge/registry-libre--devops-7B42BC?logo=terraform&logoColor=white)](https://registry.terraform.io/namespaces/libre-devops)
-[![License](https://img.shields.io/github/license/libre-devops/terraform-module-template)](./LICENSE)
+[![License](https://img.shields.io/github/license/libre-devops/terraform-azurerm-tags)](./LICENSE)
 
 </div>
 
 ---
 
+## Overview
+
+This module computes a consistent tag map and creates no resources, so it requires no provider.
+Call it once and apply its output to your resources (`tags = module.tags.tags`). It needs three
+inputs (`cost_centre`, `owner`, and an optional `environment` that defaults to the workspace), and
+it assembles the rest:
+
+| Tag | Source |
+|-----|--------|
+| `Environment` | `environment` (Title-cased), defaults to the Terraform workspace |
+| `CostCentre` | `cost_centre` (for example `1888/67`) |
+| `Owner` | `owner` |
+| `LastUpdated` | the plan timestamp, when `include_timestamp_tags` is true (default) |
+| `DeployedBranch`, `DeployedRepo` | the git branch and repo, set in CI by the `terraform-azure` action; omitted locally |
+| `hidden-title` | the `hidden_title` input, when set (a Microsoft `hidden-` tag) |
+| anything in `additional_tags` | merged last, so it overrides any of the above |
+
+Empty or null values are trimmed, so a tag is never emitted blank.
+
 ## Usage
 
 ```hcl
-module "this" {
-  source = "libre-devops/<module>/azurerm"
+module "tags" {
+  source  = "libre-devops/tags/azurerm"
+  version = "~> 1.0"
 
-  name     = "rg-ldo-uks-dev-01"
+  cost_centre = "1888/67"
+  owner       = "platform@example.com"
+  # environment defaults to the Terraform workspace
+}
+
+resource "azurerm_resource_group" "this" {
+  name     = "rg-ldo-uks-prd-001"
   location = "uksouth"
-  tags     = { environment = "dev" }
+  tags     = module.tags.tags
 }
 ```
 
+The `LastUpdated` tag changes on every run, so it shows a diff each plan; set
+`include_timestamp_tags = false` to omit it.
+
 ## Examples
 
-- [`examples/minimal`](./examples/minimal) - the smallest valid call (required inputs only).
-- [`examples/complete`](./examples/complete) - every supported input exercised.
+- [`examples/minimal`](./examples/minimal) - the two required inputs only.
+- [`examples/complete`](./examples/complete) - every input, including `hidden_title` and
+  `additional_tags`.
 
 ## Developing
 
-This repo is the template every Libre DevOps Terraform module is generated from: clone it, swap in
-your resources, and you inherit the standard layout, examples, tests, CI, and release tooling. Local
-work needs **PowerShell 7+** and **[`just`](https://github.com/casey/just)**, because the recipes
-wrap the [LibreDevOpsHelpers](https://www.powershellgallery.com/packages/LibreDevOpsHelpers)
-PowerShell module (the same engine the `libre-devops/terraform-azure` action runs in CI). Install
-just with `brew install just`, or `uv tool add rust-just` then `uv run just <recipe>`.
+Local work needs **PowerShell 7+** and **[`just`](https://github.com/casey/just)**; the recipes wrap
+the [LibreDevOpsHelpers](https://www.powershellgallery.com/packages/LibreDevOpsHelpers) module (the
+same engine the `libre-devops/terraform-azure` action runs). Install just with `brew install just`,
+or `uv tool add rust-just` then `uv run just <recipe>`.
 
-Run `just` to list recipes: `just update-ldo-pwsh` (install or force-update LibreDevOpsHelpers from
-PSGallery), `just validate`, `just scan` (Trivy only), `just pwsh-analyze` (PSScriptAnalyzer only),
-`just plan`, `just apply`, `just destroy`, `just e2e`, `just test`, and `just docs` (the
-plan/apply/destroy recipes mirror the action, including the storage firewall dance; `just e2e`
-applies an example then always destroys it, defaulting to `minimal`, so nothing is left running).
-Releasing is also `just`:
-`just increment-release [patch|minor|major]` bumps, tags, and publishes a GitHub release, and the
-Terraform Registry picks up the tag.
+Run `just` to list recipes: `just validate`, `just scan`, `just pwsh-analyze`, `just test`,
+`just plan`/`just apply`/`just destroy`/`just e2e` (mirror the action), and `just docs`. Release with
+`just increment-release [patch|minor|major]`; the Terraform Registry picks up the tag.
 
 ## Security scan exceptions
 
 This module is scanned with [Trivy](https://github.com/aquasecurity/trivy); HIGH and CRITICAL
 findings fail the build. Any waiver is a deliberate, reviewed decision, never a way to quiet a
-finding that should be fixed. Waivers live in [`.trivyignore.yaml`](./.trivyignore.yaml) (the
-machine-applied source of truth, passed to Trivy with `--ignorefile`) and are mirrored in the table
-below so the reason is auditable.
+finding that should be fixed. Waivers live in [`.trivyignore.yaml`](./.trivyignore.yaml) and are
+mirrored in the table below so the reason is auditable.
 
 | Trivy ID | Resource | Finding | Justification |
 |----------|----------|---------|---------------|
 | _None_   |          |         |               |
-
-To add an exception: add an entry to `.trivyignore.yaml` (`id`, optional `paths` to scope it, and a
-`statement` recording why), then add a matching row here. Where the finding is out of this module's
-scope, point the justification at the Libre DevOps module that does address it (for example the
-private-endpoint module). Both the file and this table are reviewed in the pull request.
 
 ## Reference
 

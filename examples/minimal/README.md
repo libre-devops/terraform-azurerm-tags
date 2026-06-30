@@ -18,17 +18,21 @@ applies the stack then always destroys it.
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.0.0, < 5.0.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_this"></a> [this](#module\_this) | ../../ | n/a |
+| <a name="module_tags"></a> [tags](#module\_tags) | ../../ | n/a |
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
 
 ## Inputs
 
@@ -42,6 +46,6 @@ No resources.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_ids"></a> [ids](#output\_ids) | Map of resource group name to id. |
-| <a name="output_names"></a> [names](#output\_names) | Map of resource group name to name. |
+| <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | Name of the tagged resource group. |
+| <a name="output_tags"></a> [tags](#output\_tags) | The tag map produced by the module. |
 <!-- END_TF_DOCS -->

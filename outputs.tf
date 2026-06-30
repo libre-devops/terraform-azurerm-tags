@@ -1,9 +1,9 @@
-output "ids" {
-  description = "Map of resource group name to its id."
-  value       = { for k, v in azurerm_resource_group.this : k => v.id }
+output "environment" {
+  description = "The resolved (Title-cased) Environment tag value."
+  value       = local.environment
 }
 
-output "names" {
-  description = "Map of resource group name to its name."
-  value       = { for k, v in azurerm_resource_group.this : k => v.name }
+output "tags" {
+  description = "The merged, validated tag map to apply to resources (tags = module.tags.tags)."
+  value       = local.tags
 }
