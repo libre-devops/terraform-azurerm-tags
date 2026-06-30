@@ -16,14 +16,14 @@ variable "cost_centre" {
 }
 
 variable "deployed_branch" {
-  description = "Git branch the deployment came from, for a DeployedBranch tag. Set in CI by the terraform-azure action (TF_VAR_deployed_branch); empty locally."
+  description = "Git branch the deployment came from, emitted as a DeployedBranch tag. The module cannot read git, so pass this in. In CI the terraform-azure action exports TF_VAR_deployed_branch, so declare a matching root variable in your stack and forward it here (deployed_branch = var.deployed_branch). Empty is omitted."
   type        = string
   default     = ""
   nullable    = false
 }
 
 variable "deployed_repo" {
-  description = "Repository URL the deployment came from, for a DeployedRepo tag. Set in CI by the terraform-azure action (TF_VAR_deployed_repo); empty locally."
+  description = "Repository URL the deployment came from, emitted as a DeployedRepo tag. The module cannot read git, so pass this in. In CI the terraform-azure action exports TF_VAR_deployed_repo, so declare a matching root variable in your stack and forward it here (deployed_repo = var.deployed_repo). Empty is omitted."
   type        = string
   default     = ""
   nullable    = false

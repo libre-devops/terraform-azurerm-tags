@@ -33,11 +33,33 @@ it assembles the rest:
 | `CostCentre` | `cost_centre` (for example `1888/67`) |
 | `Owner` | `owner` |
 | `LastUpdated` | the plan timestamp, when `include_timestamp_tags` is true (default) |
-| `DeployedBranch`, `DeployedRepo` | the git branch and repo, set in CI by the `terraform-azure` action; omitted locally |
+| `DeployedBranch`, `DeployedRepo` | the `deployed_branch` / `deployed_repo` inputs (see "CI-derived tags" below); omitted when empty |
 | `hidden-title` | the `hidden_title` input, when set (a Microsoft `hidden-` tag) |
 | anything in `additional_tags` | merged last, so it overrides any of the above |
 
 Empty or null values are trimmed, so a tag is never emitted blank.
+
+### CI-derived tags
+
+The module cannot read git itself (it is pure HCL and pulls in no providers), so `deployed_branch`
+and `deployed_repo` are plain inputs. Terraform's `TF_VAR_*` only populates *root* variables, not a
+child module's inputs, so the chain is: the `terraform-azure` action exports `TF_VAR_deployed_branch`
+and `TF_VAR_deployed_repo` in CI, your stack declares matching root variables (auto-filled from those),
+and forwards them to this module. They are empty (and omitted from the tags) when run locally.
+
+```hcl
+variable "deployed_branch" { type = string, default = "" } # auto-filled by TF_VAR_deployed_branch in CI
+variable "deployed_repo"   { type = string, default = "" } # auto-filled by TF_VAR_deployed_repo in CI
+
+module "tags" {
+  source = "libre-devops/tags/azurerm"
+
+  cost_centre     = "1888/67"
+  owner           = "platform@example.com"
+  deployed_branch = var.deployed_branch
+  deployed_repo   = var.deployed_repo
+}
+```
 
 ## Usage
 
