@@ -33,6 +33,27 @@ run "trims_empty_deployed_tags" {
   }
 }
 
+run "exposes_tag_groups_separately" {
+  command = plan
+
+  assert {
+    condition     = output.core_tags["CostCentre"] == "1888/67" && length(output.core_tags) == 3
+    error_message = "core_tags should expose only the three core tags."
+  }
+  assert {
+    condition     = contains(keys(output.timestamp_tags), "LastUpdated")
+    error_message = "timestamp_tags should expose the LastUpdated tag."
+  }
+  assert {
+    condition     = length(output.deployed_tags) == 0
+    error_message = "deployed_tags should be empty when no deployed_* inputs are set."
+  }
+  assert {
+    condition     = length(output.hidden_tags) == 0
+    error_message = "hidden_tags should be empty when hidden_title is not set."
+  }
+}
+
 run "sets_deployed_tags_when_supplied" {
   command = plan
 
@@ -48,6 +69,10 @@ run "sets_deployed_tags_when_supplied" {
   assert {
     condition     = output.tags["DeployedRepo"] == "https://github.com/libre-devops/terraform-azurerm-tags"
     error_message = "DeployedRepo should be set from the variable."
+  }
+  assert {
+    condition     = output.deployed_tags["DeployedBranch"] == "main" && length(output.deployed_tags) == 2
+    error_message = "deployed_tags should expose just the deployed-from tags when supplied."
   }
 }
 

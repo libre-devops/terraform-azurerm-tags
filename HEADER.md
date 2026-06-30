@@ -39,6 +39,10 @@ it assembles the rest:
 
 Empty or null values are trimmed, so a tag is never emitted blank.
 
+As well as the full `tags` output, each group is exposed on its own so you can apply just a subset:
+`core_tags`, `timestamp_tags`, `deployed_tags`, `hidden_tags`, and `additional_tags` (plus
+`environment`). Each is trimmed the same way.
+
 ### CI-derived tags
 
 The module cannot read git itself (it is pure HCL and pulls in no providers), so `deployed_branch`

@@ -39,6 +39,10 @@ it assembles the rest:
 
 Empty or null values are trimmed, so a tag is never emitted blank.
 
+As well as the full `tags` output, each group is exposed on its own so you can apply just a subset:
+`core_tags`, `timestamp_tags`, `deployed_tags`, `hidden_tags`, and `additional_tags` (plus
+`environment`). Each is trimmed the same way.
+
 ### CI-derived tags
 
 The module cannot read git itself (it is pure HCL and pulls in no providers), so `deployed_branch`
@@ -151,6 +155,11 @@ No resources.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_additional_tags"></a> [additional\_tags](#output\_additional\_tags) | The additional\_tags input, echoed back for convenience. |
+| <a name="output_core_tags"></a> [core\_tags](#output\_core\_tags) | Just the core tags: Environment, CostCentre, Owner. |
+| <a name="output_deployed_tags"></a> [deployed\_tags](#output\_deployed\_tags) | Just the deployed-from tags (DeployedBranch, DeployedRepo). Empty until those inputs are set. |
 | <a name="output_environment"></a> [environment](#output\_environment) | The resolved (Title-cased) Environment tag value. |
-| <a name="output_tags"></a> [tags](#output\_tags) | The merged, validated tag map to apply to resources (tags = module.tags.tags). |
+| <a name="output_hidden_tags"></a> [hidden\_tags](#output\_hidden\_tags) | Just the Microsoft hidden- tags (hidden-title). Empty unless hidden\_title is set. |
+| <a name="output_tags"></a> [tags](#output\_tags) | The full merged tag map to apply to resources (tags = module.tags.tags). |
+| <a name="output_timestamp_tags"></a> [timestamp\_tags](#output\_timestamp\_tags) | Just the timestamp tags (LastUpdated). Empty when include\_timestamp\_tags is false. |
 <!-- END_TF_DOCS -->
